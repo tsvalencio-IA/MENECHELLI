@@ -1,6 +1,10 @@
 /* ==================================================================
-   DASHBOARD CENTER CAR MENECHELLI - V5.0 (FINAL DEFINITIVO)
-   Desenvolvido por: thIAguinho Soluções
+   DASHBOARD CENTER CAR MENECHELLI - V5.0 (GOLDEN VERSION)
+   - Funcionalidades Completas
+   - Mobile Otimizado (Cards finos, Scroll Coluna)
+   - Gestor Híbrido (Topo PC / Menu Mobile)
+   - Busca em Entregues
+   - LED Restaurado
    ================================================================== */
 
 const firebaseConfig = {
@@ -13,7 +17,7 @@ const firebaseConfig = {
   appId: "1:697435506647:web:dce5cbf910f4960f732d92"
 };
 
-// ESTADO GLOBAL
+// --- ESTADO GLOBAL ---
 let activeCloudinaryConfig = null;
 let currentUser = null;
 let allServiceOrders = {};
@@ -41,12 +45,13 @@ function showNotification(message, type = 'success') {
 
 // --- CLOUDINARY ---
 const uploadFileToCloudinary = async (file) => {
-  if (!activeCloudinaryConfig) throw new Error('Mídia não configurada no Admin.');
+  if (!activeCloudinaryConfig) throw new Error('Configure a Mídia no menu de Gestor.');
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', activeCloudinaryConfig.uploadPreset);
+  
   const res = await fetch(`https://api.cloudinary.com/v1_1/${activeCloudinaryConfig.cloudName}/auto/upload`, { method: 'POST', body: formData });
-  if (!res.ok) throw new Error('Erro no upload.');
+  if (!res.ok) throw new Error('Erro ao enviar imagem.');
   const data = await res.json();
   return { url: data.secure_url, type: data.resource_type };
 };
@@ -56,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
   try { firebase.initializeApp(firebaseConfig); } catch(e) { console.error(e); }
   const db = firebase.database();
 
-  // CARREGAR DADOS BÁSICOS
+  // 1. CARREGAR CONFIGS E USUÁRIOS
   db.ref('cloudinaryConfigs').limitToLast(1).on('value', snap => { const val = snap.val(); if(val) activeCloudinaryConfig = Object.values(val)[0]; });
 
   db.ref('users').on('value', snap => {
@@ -70,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
           Object.entries(data).forEach(([key, user]) => {
               allUsers.push({...user, id: key});
               const opt = document.createElement('option');
-              opt.value = JSON.stringify(user);
+              opt.value = JSON.stringify({id: key, name: user.name, role: user.role || 'Colaborador', password: user.password});
               opt.textContent = user.name;
               select.appendChild(opt);
           });
@@ -79,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!currentUser) checkSession();
   });
 
-  // LOGIN & SESSÃO
+  // 2. SESSÃO E LOGIN
   const checkSession = () => {
       const stored = localStorage.getItem(SESSION_KEY);
       if (!stored) return;
@@ -88,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const now = new Date();
           const cutoff = new Date(); cutoff.setHours(19, 0, 0, 0); 
           if (now > cutoff && new Date(session.loginTime) < cutoff) {
-              localStorage.removeItem(SESSION_KEY); showNotification("Sessão expirada.", "error"); return;
+              localStorage.removeItem(SESSION_KEY); showNotification("Sessão expirada (19h).", "error"); return;
           }
           performLogin(session.user);
       } catch (e) { localStorage.removeItem(SESSION_KEY); }
@@ -104,16 +109,19 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const isManager = user.role === 'Gestor' || (user.name && user.name.includes('Thiago'));
       
-      // Controle de Botões Duplicados (CSS trata a visibilidade, JS só popula)
+      // Controle Híbrido de Botões (Desktop vs Mobile)
       const mobileAdmin = document.getElementById('adminBtnMobile');
       const mobileReports = document.getElementById('reportsBtnMobile');
       const desktopAdmin = document.getElementById('desktopAdminActions');
       const adminZone = document.getElementById('adminZone');
 
       if (isManager) {
+          // Mobile: Mostra no dropdown
           mobileAdmin.classList.remove('hidden');
           mobileReports.classList.remove('hidden');
+          // Desktop: Mostra no topo (o CSS 'md:flex' vai controlar a exibição baseada na tela)
           desktopAdmin.classList.remove('hidden'); desktopAdmin.classList.add('md:flex');
+          // Ficha: Botão excluir
           adminZone.classList.remove('hidden');
       } else {
           mobileAdmin.classList.add('hidden');
@@ -143,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('logoutButton').onclick = () => { localStorage.removeItem(SESSION_KEY); location.reload(); };
 
-  // MENU E MODAIS
+  // 3. MENU MOBILE & MODAIS
   const userMenuBtn = document.getElementById('userMenuBtn');
   const userDropdown = document.getElementById('userDropdown');
   if(userMenuBtn) userMenuBtn.onclick = (e) => { e.stopPropagation(); userDropdown.classList.toggle('hidden'); };
@@ -151,17 +159,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const openModal = (id) => { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); userDropdown.classList.add('hidden'); };
   
+  // Handlers para os botões (Desktop e Mobile chamam a mesma função)
   document.getElementById('adminBtn').onclick = () => openModal('adminModal');
   document.getElementById('adminBtnMobile').onclick = () => openModal('adminModal');
   document.getElementById('reportsBtn').onclick = () => openModal('reportsModal');
   document.getElementById('reportsBtnMobile').onclick = () => openModal('reportsModal');
 
   document.querySelectorAll('.btn-close-modal').forEach(b => b.onclick = (e) => {
-      e.target.closest('.modal').classList.add('hidden');
-      e.target.closest('.modal').classList.remove('flex');
+      e.target.closest('.modal').classList.add('hidden'); e.target.closest('.modal').classList.remove('flex');
   });
 
-  // ADMIN ABAS
+  // 4. ADMIN & RELATÓRIOS
   document.querySelectorAll('.admin-tab').forEach(tab => {
       tab.onclick = () => {
           document.querySelectorAll('.admin-tab').forEach(t => { t.classList.remove('border-blue-600', 'text-blue-600'); t.classList.add('text-gray-500'); });
@@ -171,11 +179,10 @@ document.addEventListener('DOMContentLoaded', () => {
       };
   });
 
-  // LÓGICA ADMIN
   const renderAdminUserList = () => {
       const list = document.getElementById('usersList');
       if(!list) return;
-      list.innerHTML = allUsers.map(u => `<div class="flex justify-between p-2 border-b"><span><b>${u.name}</b> (${u.role})</span> ${u.name.includes('Thiago')?'':`<button onclick="window.removeUser('${u.id}')" class="text-red-500"><i class='bx bxs-trash'></i></button>`}</div>`).join('');
+      list.innerHTML = allUsers.map(u => `<div class="flex justify-between items-center p-2 border-b text-sm"><span><b>${u.name}</b><br><span class="text-xs text-gray-500">${u.role}</span></span> ${u.name.includes('Thiago')?'':`<button onclick="window.removeUser('${u.id}')" class="text-red-500 p-2"><i class='bx bxs-trash'></i></button>`}</div>`).join('');
   };
   window.removeUser = (id) => { if(confirm('Remover?')) db.ref(`users/${id}`).remove(); };
   
@@ -187,19 +194,19 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('cloudinaryForm').onsubmit = (e) => {
       e.preventDefault();
       db.ref('cloudinaryConfigs').push({ cloudName: document.getElementById('cloudNameInput').value, uploadPreset: document.getElementById('uploadPresetInput').value });
-      showNotification('Config salva!');
+      showNotification('Configuração Salva!');
   };
 
-  // KANBAN
+  // 5. KANBAN (Com busca em Entregues)
   const initKanban = () => {
       const board = document.getElementById('kanbanBoard');
       board.innerHTML = STATUS_LIST.map(status => `
         <div class="status-column">
             <div class="column-header">
                 <span>${status.replace(/-/g, ' ')}</span>
-                <span class="bg-white/50 px-2 rounded text-xs" id="count-${status}">0</span>
+                <span class="bg-white/50 px-2 py-0.5 rounded text-[10px]" id="count-${status}">0</span>
             </div>
-            ${status === 'Entregue' ? '<div class="px-2 pt-2"><input type="text" class="delivery-search" placeholder="Buscar entregue..." onkeyup="window.filterDelivered(this.value)"></div>' : ''}
+            ${status === 'Entregue' ? '<input type="text" class="search-delivered" placeholder="Buscar Entregues..." onkeyup="window.filterDelivered(this.value)">' : ''}
             <div class="vehicle-list" id="col-${status}"></div>
         </div>
       `).join('');
@@ -221,6 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
               const c = document.getElementById(`col-${s}`); 
               if(c) document.getElementById(`count-${s}`).innerText = c.children.length; 
           });
+          updateAlerts();
           
           // Refresh Modal
           const modal = document.getElementById('detailsModal');
@@ -235,23 +243,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const createCard = (os) => {
       const idx = STATUS_LIST.indexOf(os.status);
-      const prev = idx > 0 ? `<button onclick="event.stopPropagation(); window.quickMove('${os.id}','prev')" class="text-gray-400 hover:text-blue-600 p-2"><i class='bx bx-chevron-left text-xl'></i></button>` : '<div></div>';
-      const next = idx < STATUS_LIST.length - 1 ? `<button onclick="event.stopPropagation(); window.quickMove('${os.id}','next')" class="text-gray-400 hover:text-blue-600 p-2"><i class='bx bx-chevron-right text-xl'></i></button>` : '<div></div>';
+      // Setinhas
+      const prev = idx > 0 ? `<button onclick="event.stopPropagation(); window.quickMove('${os.id}','prev')" class="card-btn"><i class='bx bx-chevron-left text-lg'></i></button>` : '<div></div>';
+      const next = idx < STATUS_LIST.length - 1 ? `<button onclick="event.stopPropagation(); window.quickMove('${os.id}','next')" class="card-btn"><i class='bx bx-chevron-right text-lg'></i></button>` : '<div></div>';
       
       let prioClass = os.priority === 'vermelho' ? 'border-red-500' : '';
 
       return `
       <div class="vehicle-card status-${os.status} ${prioClass}" onclick="window.openDetails('${os.id}')" data-search="${os.placa} ${os.cliente} ${os.modelo}">
-          <div class="flex justify-between items-start mb-1">
-              <span class="font-black text-slate-800 text-lg">${os.placa}</span>
+          <div class="flex justify-between items-center mb-1">
+              <span class="font-black text-slate-800 text-base">${os.placa}</span>
               ${os.priority === 'vermelho' ? '<i class="bx bxs-hot text-red-500 animate-pulse"></i>' : ''}
           </div>
-          <div class="text-xs font-bold text-blue-700 truncate mb-1">${os.modelo}</div>
-          <div class="text-[10px] text-gray-500 font-medium flex justify-between border-t border-dashed pt-1">
-             <span>${os.cliente.split(' ')[0]}</span>
-             <span>${os.km ? os.km + 'km' : ''}</span>
-          </div>
-          <div class="flex justify-between items-center mt-1 pt-1 border-t border-gray-100">
+          <div class="text-[11px] font-bold text-blue-700 truncate">${os.modelo}</div>
+          <div class="text-[10px] text-gray-500 mt-1">${os.cliente.split(' ')[0]}</div>
+          <div class="card-actions">
               ${prev} <span class="text-[9px] text-gray-300 font-bold">MOVER</span> ${next}
           </div>
       </div>`;
@@ -266,16 +272,17 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if(newStatus) {
           const up = { status: newStatus, lastUpdate: new Date().toISOString() };
+          // Auto-atribuição
           if(newStatus==='Em-Analise') up.responsibleForBudget=currentUser.name;
           if(newStatus==='Em-Execucao') up.responsibleForService=currentUser.name;
           if(newStatus==='Entregue') up.responsibleForDelivery=currentUser.name;
           db.ref(`serviceOrders/${id}`).update(up);
           db.ref(`serviceOrders/${id}/logs`).push({ user: currentUser.name, timestamp: new Date().toISOString(), description: `Status: ${os.status} -> ${newStatus}`, type: 'status' });
-          showNotification('Movido!');
+          showNotification('Status atualizado!');
       }
   };
 
-  // BUSCA FILTRADA NOS ENTREGUES
+  // BUSCA FILTRADA EM "ENTREGUE"
   window.filterDelivered = (val) => {
       const col = document.getElementById('col-Entregue');
       if(!col) return;
@@ -286,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   };
 
-  // DETALHES, EDIÇÃO E KM
+  // 6. DETALHES, EDIÇÃO, KM
   window.openDetails = (id) => {
       const os = allServiceOrders[id]; if(!os) return;
       document.getElementById('logOsId').value = id;
@@ -320,8 +327,8 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const fieldHtml = (field, val, label) => `
         <div class="bg-gray-50 p-2 rounded border">
-            <div class="flex justify-between"><span class="text-xs text-slate-400 font-bold">${label}</span> ${editIcon(field)}</div>
-            <div id="view-${field}" class="font-bold text-slate-800">${val||'-'}</div>
+            <div class="flex justify-between"><span class="text-[10px] text-slate-400 font-bold">${label}</span> ${editIcon(field)}</div>
+            <div id="view-${field}" class="font-bold text-sm text-slate-800">${val||'-'}</div>
             <div id="edit-${field}" class="hidden flex gap-1 mt-1">
                 <input id="input-${field}" value="${val||''}" class="w-full p-1 text-sm border rounded">
                 <button onclick="window.saveEdit('${field}','${os.id}')" class="text-green-600"><i class='bx bx-check'></i></button>
@@ -329,26 +336,25 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         </div>`;
 
-      document.getElementById('modalTitlePlaca').innerHTML = `${os.placa} ${isManager?`<i class='bx bx-edit text-sm cursor-pointer' onclick="window.toggleEdit('placa','${os.id}',true)"></i>`:''}`;
-      document.getElementById('modalTitleModelo').innerText = `${os.modelo} - ${os.cliente}`;
+      document.getElementById('modalTitlePlaca').innerHTML = `${os.placa} ${isManager?`<i class='bx bx-edit text-sm cursor-pointer text-gray-300' onclick="window.toggleEdit('placa','${os.id}',true)"></i>`:''}`;
+      document.getElementById('modalTitleModelo').innerText = `${os.modelo}`;
       
       document.getElementById('detailsInfoContent').innerHTML = `
-          <div class="grid grid-cols-2 gap-2 mb-4">
+          <div class="grid grid-cols-2 gap-2 mb-3">
               ${fieldHtml('cliente', os.cliente, 'CLIENTE')}
-              ${fieldHtml('telefone', os.telefone, 'TELEFONE')}
-              ${fieldHtml('modelo', os.modelo, 'MODELO')}
-              <div class="bg-gray-50 p-2 rounded border"><span class="text-xs text-slate-400 font-bold">CONSULTOR</span><div class="font-bold">${os.responsible}</div></div>
+              ${fieldHtml('telefone', os.telefone, 'TEL')}
+              ${fieldHtml('modelo', os.modelo, 'VEÍCULO')}
+              <div class="bg-gray-50 p-2 rounded border"><span class="text-[10px] text-slate-400 font-bold">RESP.</span><div class="font-bold text-sm">${os.responsible}</div></div>
           </div>
-          <div class="bg-blue-50 p-3 rounded flex justify-between items-center mb-4">
-              <div><span class="text-xs font-bold text-blue-800">KM</span><div class="font-black text-xl">${os.km||'--'}</div></div>
-              <div class="flex gap-2"><input id="quickKmInput" type="number" placeholder="Novo KM" class="w-24 p-1 rounded border text-center"><button onclick="window.saveKm('${os.id}')" class="bg-blue-600 text-white px-3 rounded font-bold">OK</button></div>
+          <div class="bg-blue-50 p-2 rounded flex justify-between items-center mb-3 border border-blue-100">
+              <div><span class="text-[10px] font-bold text-blue-800">KM ATUAL</span><div class="font-black text-lg">${os.km||'--'}</div></div>
+              <div class="flex gap-1"><input id="quickKmInput" type="number" placeholder="KM" class="w-20 p-1 rounded border text-center text-sm"><button onclick="window.saveKm('${os.id}')" class="bg-blue-600 text-white px-3 rounded font-bold text-sm">OK</button></div>
           </div>
-          <div class="bg-red-50 p-3 rounded border-l-4 border-red-500">
-              <div class="flex justify-between"><span class="text-xs font-bold text-red-800">QUEIXA</span> ${editIcon('observacoes')}</div>
-              <div id="view-observacoes" class="text-sm">${os.observacoes||''}</div>
-              <div id="edit-observacoes" class="hidden mt-2"><textarea id="input-observacoes" class="w-full p-2 border rounded" rows="3">${os.observacoes||''}</textarea><div class="flex justify-end gap-2 mt-1"><button onclick="window.cancelEdit('observacoes')" class="text-xs underline">Cancel</button><button onclick="window.saveEdit('observacoes','${os.id}')" class="bg-red-600 text-white px-3 rounded text-xs font-bold">Salvar</button></div></div>
-          </div>
-      `;
+          <div class="bg-red-50 p-2 rounded border-l-4 border-red-500">
+              <div class="flex justify-between"><span class="text-[10px] font-bold text-red-800">RECLAMAÇÃO</span> ${editIcon('observacoes')}</div>
+              <div id="view-observacoes" class="text-xs text-red-900">${os.observacoes||''}</div>
+              <div id="edit-observacoes" class="hidden mt-2"><textarea id="input-observacoes" class="w-full p-2 border rounded text-sm" rows="3">${os.observacoes||''}</textarea><div class="flex justify-end gap-2 mt-1"><button onclick="window.cancelEdit('observacoes')" class="text-xs underline">Cancel</button><button onclick="window.saveEdit('observacoes','${os.id}')" class="bg-red-600 text-white px-3 rounded text-xs font-bold">Salvar</button></div></div>
+          </div>`;
   };
 
   window.toggleEdit = (field, id, promptMode=false) => {
@@ -379,12 +385,12 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   const logEdit = (id, field, val) => db.ref(`serviceOrders/${id}/logs`).push({user: currentUser.name, timestamp: new Date().toISOString(), description: `Editou ${field} para ${val}`, type: 'log'});
 
-  // LOGS, MÍDIA, RELATÓRIOS (Restante da lógica mantida igual V4.1)
+  // 7. RESTO DA LÓGICA (MÍDIA, RELATÓRIOS, TIMELINE)
   const renderTimeline = (os) => {
       const el = document.getElementById('timelineContainer');
       if(!os.logs) { el.innerHTML = '<p class="text-center text-xs text-gray-400">Vazio</p>'; return; }
       const logs = Object.entries(os.logs).sort((a,b)=>new Date(b[1].timestamp)-new Date(a[1].timestamp));
-      el.innerHTML = logs.map(([k,l]) => `<div class="border-l-2 border-gray-200 pl-3 pb-3 relative"><div class="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-blue-500"></div><div class="flex justify-between"><span class="font-bold text-xs text-blue-900">${l.user}</span><span class="text-[10px] text-gray-400">${new Date(l.timestamp).toLocaleString()}</span></div><p class="text-sm bg-white p-2 rounded border">${l.description} ${l.parts?`<br><b>Peças:</b> ${l.parts} | <b>R$</b> ${l.value}`:''}</p>${currentUser.role==='Gestor'?`<button onclick="window.deleteLog('${os.id}','${k}')" class="text-[10px] text-red-400">Excluir</button>`:''}</div>`).join('');
+      el.innerHTML = logs.map(([k,l]) => `<div class="border-l-2 border-gray-200 pl-3 pb-3 relative"><div class="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-blue-500"></div><div class="flex justify-between"><span class="font-bold text-xs text-blue-900">${l.user}</span><span class="text-[10px] text-gray-400">${new Date(l.timestamp).toLocaleString()}</span></div><p class="text-xs bg-white p-2 rounded border mt-1">${l.description} ${l.parts?`<br><b>Peças:</b> ${l.parts} | <b>R$</b> ${l.value}`:''}</p>${currentUser.role==='Gestor'?`<button onclick="window.deleteLog('${os.id}','${k}')" class="text-[10px] text-red-400 mt-1">Excluir</button>`:''}</div>`).join('');
   };
   window.deleteLog = (id,k) => { if(confirm('Apagar?')) db.ref(`serviceOrders/${id}/logs/${k}`).remove(); };
 
@@ -392,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const el = document.getElementById('thumbnail-grid');
       if(!os.media) { el.innerHTML = '<p class="col-span-full text-center text-xs text-gray-400">Sem mídia</p>'; return; }
       const m = Object.entries(os.media); lightboxMedia = m.map(x=>x[1]);
-      el.innerHTML = m.map(([k,v], i) => `<div class="aspect-square bg-gray-100 rounded relative overflow-hidden" onclick="window.openLightbox(${i})">${v.type.includes('video')?'<i class="bx bx-play-circle text-3xl absolute inset-0 flex items-center justify-center"></i>':`<img src="${v.url}" class="w-full h-full object-cover">`}${currentUser.role==='Gestor'?`<button onclick="event.stopPropagation();window.deleteMedia('${os.id}','${k}')" class="absolute top-0 right-0 bg-red-600 text-white w-5 h-5 flex items-center justify-center">&times;</button>`:''}</div>`).join('');
+      el.innerHTML = m.map(([k,v], i) => `<div class="aspect-square bg-gray-100 rounded relative overflow-hidden border" onclick="window.openLightbox(${i})">${v.type.includes('video')?'<i class="bx bx-play-circle text-2xl absolute inset-0 flex items-center justify-center"></i>':`<img src="${v.url}" class="w-full h-full object-cover">`}${currentUser.role==='Gestor'?`<button onclick="event.stopPropagation();window.deleteMedia('${os.id}','${k}')" class="absolute top-0 right-0 bg-red-600 text-white w-5 h-5 flex items-center justify-center text-xs">&times;</button>`:''}</div>`).join('');
   };
   window.deleteMedia = (id,k) => { if(confirm('Apagar?')) db.ref(`serviceOrders/${id}/media/${k}`).remove(); };
   window.openLightbox = (i) => {
@@ -415,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
           showNotification('Salvo!'); e.target.reset(); filesToUpload=[]; document.getElementById('fileName').innerText='';
           document.getElementById('post-log-actions').classList.remove('hidden');
       } catch(err) { showNotification(err.message, 'error'); }
-      btn.disabled=false; btn.innerText='SALVAR';
+      btn.disabled=false; btn.innerText='SALVAR NO HISTÓRICO';
   };
   
   // Movimentação via Log
@@ -431,13 +437,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = Object.values(allServiceOrders).filter(o => o.status === 'Entregue' && new Date(o.lastUpdate) >= i && new Date(o.lastUpdate) <= f);
       const c = document.getElementById('reportsResultContainer');
       const btn = document.getElementById('exportReportBtn');
-      if(!res.length) { c.innerHTML='<p class="text-center p-4">Nada encontrado.</p>'; btn.classList.add('hidden'); return; }
+      if(!res.length) { c.innerHTML='<p class="text-center p-4 text-xs">Nada encontrado.</p>'; btn.classList.add('hidden'); return; }
       
-      c.innerHTML = `<table class="w-full text-sm"><thead><tr class="bg-gray-200 text-left"><th class="p-2">Data</th><th class="p-2">Placa</th><th class="p-2">Cliente</th></tr></thead><tbody>${res.map(r=>`<tr class="border-b"><td class="p-2">${new Date(r.lastUpdate).toLocaleDateString()}</td><td class="p-2 font-bold">${r.placa}</td><td class="p-2">${r.cliente}</td></tr>`).join('')}</tbody></table>`;
+      c.innerHTML = `<table class="w-full text-xs"><thead><tr class="bg-gray-200 text-left"><th class="p-1">Data</th><th class="p-1">Placa</th><th class="p-1">Cliente</th></tr></thead><tbody>${res.map(r=>`<tr class="border-b"><td class="p-1">${new Date(r.lastUpdate).toLocaleDateString()}</td><td class="p-1 font-bold">${r.placa}</td><td class="p-1">${r.cliente}</td></tr>`).join('')}</tbody></table>`;
       btn.classList.remove('hidden');
       btn.onclick = () => {
           const w = window.open('','','width=800,height=600');
-          w.document.write(`<html><head><style>body{font-family:sans-serif}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:5px;text-align:left}</style></head><body><h2>Relatório</h2>${c.innerHTML}<script>window.print()</script></body></html>`);
+          w.document.write(`<html><head><style>body{font-family:sans-serif;font-size:12px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:5px;text-align:left}</style></head><body><h2>Relatório</h2>${c.innerHTML}<script>window.print()</script></body></html>`);
           w.document.close();
       };
   };
@@ -468,7 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
           priority: prio, status: 'Aguardando-Mecanico', createdAt: new Date().toISOString()
       });
       document.getElementById('osModal').classList.add('hidden'); document.getElementById('osModal').classList.remove('flex');
-      showNotification('Criada!');
+      showNotification('Ficha Criada!');
   };
 
   // Busca Global
@@ -477,14 +483,29 @@ document.addEventListener('DOMContentLoaded', () => {
       const r = document.getElementById('globalSearchResults');
       if(v.length<2) { r.classList.add('hidden'); return; }
       const f = Object.values(allServiceOrders).filter(o => (o.placa+o.cliente+o.modelo).toUpperCase().includes(v));
-      r.innerHTML = f.length ? f.map(o=>`<div class="p-3 border-b hover:bg-gray-50 cursor-pointer flex justify-between" onclick="window.openDetails('${o.id}');document.getElementById('globalSearchResults').classList.add('hidden')"><div><b>${o.placa}</b> ${o.modelo}</div><span class="text-xs bg-blue-100 px-2 rounded">${o.status}</span></div>`).join('') : '<div class="p-3 text-center">Nada</div>';
+      r.innerHTML = f.length ? f.map(o=>`<div class="p-2 border-b hover:bg-gray-50 cursor-pointer flex justify-between items-center" onclick="window.openDetails('${o.id}');document.getElementById('globalSearchResults').classList.add('hidden')"><div><b class="text-sm">${o.placa}</b> <span class="text-xs text-gray-500">${o.modelo}</span></div><span class="text-[10px] bg-blue-100 px-2 rounded">${o.status}</span></div>`).join('') : '<div class="p-2 text-center text-xs">Nada</div>';
       r.classList.remove('hidden');
   };
 
-  const printOS = (os) => {
-      // (Mantido igual V4.1 - Layout HTML bonito)
-      const logs = os.logs ? Object.values(os.logs).sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp)) : [];
-      const h = `<html><head><style>body{font-family:sans-serif;padding:20px}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #ddd;padding:5px;text-align:left}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.imgs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px}img{width:100%;height:100px;object-fit:cover}</style></head><body><h1 style="text-align:center;border-bottom:2px solid blue">CENTER CAR MENECHELLI</h1><div class="grid"><div><b>Placa:</b> ${os.placa}</div><div><b>Modelo:</b> ${os.modelo}</div><div><b>Cliente:</b> ${os.cliente}</div><div><b>KM:</b> ${os.km||'-'}</div></div><br><b>Queixa:</b> ${os.observacoes||'-'}<h3>Histórico</h3><table><thead><tr><th>Data</th><th>Resp.</th><th>Desc.</th><th>Peças</th><th>Valor</th></tr></thead><tbody>${logs.map(l=>`<tr><td>${new Date(l.timestamp).toLocaleString()}</td><td>${l.user}</td><td>${l.description}</td><td>${l.parts||'-'}</td><td>${l.value||'-'}</td></tr>`).join('')}</tbody></table><div class="imgs">${os.media?Object.values(os.media).filter(m=>m.type.includes('image')).slice(0,6).map(m=>`<img src="${m.url}">`).join(''):''}</div><script>window.print()</script></body></html>`;
-      const w = window.open('','','width=800,height=600'); w.document.write(h); w.document.close();
+  const updateAlerts = () => {
+      const alertPanel = document.getElementById('attention-panel');
+      const led = document.getElementById('alert-led');
+      const ledStatic = document.getElementById('alert-led-static');
+      
+      const alerts = Object.values(allServiceOrders).filter(o => ['Aguardando-Mecanico','Servico-Autorizado'].includes(o.status));
+      
+      if(led) {
+          if(alerts.length) {
+              led.classList.remove('hidden'); ledStatic.classList.remove('hidden');
+          } else {
+              led.classList.add('hidden'); ledStatic.classList.add('hidden');
+          }
+      }
+      
+      if(alertPanel) alertPanel.innerHTML = alerts.map(o => `<div class="bg-slate-700 p-2 rounded text-white text-xs cursor-pointer border-l-4 ${o.status.includes('Mecanico')?'border-yellow-500':'border-green-500'}" onclick="window.openDetails('${o.id}')"><b>${o.placa}</b> ${o.status.replace(/-/g,' ')}</div>`).join('');
+  };
+  document.getElementById('toggle-panel-btn').onclick = () => {
+      const c = document.getElementById('attention-panel-container');
+      c.style.maxHeight = c.style.maxHeight ? null : '200px';
   };
 });
