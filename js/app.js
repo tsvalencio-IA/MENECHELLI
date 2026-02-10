@@ -636,7 +636,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="header">
               <div class="header-logo">
                   <h1>MENECHELLI</h1>
-                  <p>Center Car Automotive</p>
+                  <p>Center Car</p>
               </div>
               <div class="header-info">
                   <div class="os-title">Ordem de Serviço</div>
@@ -736,7 +736,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           <!-- RODAPÉ SISTEMA -->
           <div class="system-footer">
-              Sistema de Gestão Center Car Menechelli v4.5 &bull; Desenvolvido por thIAguinho Soluções &bull; ${os.id}
+              Sistema de Gestão Center Car Menechelli v4.5 &bull; Desenvolvido por thIAguinho Soluções - 17997631210 &bull; ${os.id}
           </div>
 
           <script>window.print()</script>
