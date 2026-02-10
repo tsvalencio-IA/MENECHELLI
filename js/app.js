@@ -1,5 +1,5 @@
 /* ==================================================================
-   DASHBOARD CENTER CAR MENECHELLI - V4.3 (LIGHTBOX FIX)
+   DASHBOARD CENTER CAR MENECHELLI - V4.4 (BUSCA ENTREGUE)
    Desenvolvido por: thIAguinho Soluções
    ================================================================== */
 
@@ -268,19 +268,51 @@ document.addEventListener('DOMContentLoaded', () => {
       };
   };
 
-  // --- KANBAN ---
+  // --- KANBAN (ATUALIZADO COM BUSCA EM ENTREGUE) ---
   const initKanban = () => {
       const board = document.getElementById('kanbanBoard');
       if(!board) return;
-      board.innerHTML = STATUS_LIST.map(status => `
-        <div class="status-column">
-            <div class="column-header">
-                <span>${status.replace(/-/g, ' ')}</span>
-                <span class="bg-white/50 px-2 py-0.5 rounded text-[10px] border border-slate-300" id="count-${status}">0</span>
+      board.innerHTML = STATUS_LIST.map(status => {
+          // FEATURE: Input de busca específico para a coluna Entregue
+          if (status === 'Entregue') {
+              return `
+                <div class="status-column">
+                    <div class="column-header" style="display:block;">
+                        <div class="flex justify-between items-center mb-1">
+                            <span>${status.replace(/-/g, ' ')}</span>
+                            <span class="bg-white/50 px-2 py-0.5 rounded text-[10px] border border-slate-300" id="count-${status}">0</span>
+                        </div>
+                        <input type="text" id="search-entregue-input" placeholder="Buscar Placa..." onkeyup="window.filterEntregue(this.value)" 
+                               class="w-full p-1.5 text-[11px] rounded border border-slate-300 text-slate-700 bg-white/80 focus:bg-white outline-none focus:ring-1 focus:ring-blue-500 uppercase font-bold placeholder:font-normal placeholder:text-slate-400">
+                    </div>
+                    <div class="vehicle-list" id="col-${status}"></div>
+                </div>`;
+          }
+
+          return `
+            <div class="status-column">
+                <div class="column-header">
+                    <span>${status.replace(/-/g, ' ')}</span>
+                    <span class="bg-white/50 px-2 py-0.5 rounded text-[10px] border border-slate-300" id="count-${status}">0</span>
+                </div>
+                <div class="vehicle-list" id="col-${status}"></div>
             </div>
-            <div class="vehicle-list" id="col-${status}"></div>
-        </div>
-      `).join('');
+          `;
+      }).join('');
+  };
+
+  // FEATURE: Função de filtro para coluna Entregue
+  window.filterEntregue = (term) => {
+      const col = document.getElementById('col-Entregue');
+      if(!col) return;
+      const termUpper = term.toUpperCase();
+      Array.from(col.children).forEach(card => {
+          if(card.innerText.toUpperCase().includes(termUpper)) {
+              card.classList.remove('hidden');
+          } else {
+              card.classList.add('hidden');
+          }
+      });
   };
 
   const listenOS = () => {
@@ -303,7 +335,15 @@ document.addEventListener('DOMContentLoaded', () => {
               const count = document.getElementById(`count-${s}`);
               if(col) count.innerText = col.children.length;
           });
+          
+          // FEATURE: Re-aplica filtro de entregue se houver busca ativa após atualização do banco
+          const searchInput = document.getElementById('search-entregue-input');
+          if (searchInput && searchInput.value) {
+              window.filterEntregue(searchInput.value);
+          }
+
           updateAlerts();
+          
           // Refresh modal se aberto
           const modal = document.getElementById('detailsModal');
           const logId = document.getElementById('logOsId').value;
