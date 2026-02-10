@@ -1,5 +1,5 @@
 /* ==================================================================
-   DASHBOARD CENTER CAR MENECHELLI - V4.2 (MOBILE FIX + BUGS)
+   DASHBOARD CENTER CAR MENECHELLI - V4.3 (LIGHTBOX FIX)
    Desenvolvido por: thIAguinho Soluções
    ================================================================== */
 
@@ -397,7 +397,6 @@ document.addEventListener('DOMContentLoaded', () => {
               document.getElementById('confirmDeleteText').innerHTML = `Apagar <strong>${os.placa}</strong>?`;
               const confirmBtn = document.getElementById('confirmDeleteBtn');
               
-              // CORREÇÃO BUG EXCLUSÃO: Fechar tudo ao confirmar
               confirmBtn.onclick = async () => {
                   await db.ref(`serviceOrders/${id}`).remove();
                   
@@ -588,12 +587,25 @@ document.addEventListener('DOMContentLoaded', () => {
       lb.classList.remove('hidden'); lb.classList.add('flex');
   };
 
-  // --- BOTÕES MODAIS ---
+  // --- BOTÕES MODAIS (CORREÇÃO AQUI) ---
   document.querySelectorAll('.btn-close-modal').forEach(b => b.onclick = (e) => {
-      e.target.closest('.modal').classList.add('hidden'); e.target.closest('.modal').classList.remove('flex');
-      document.getElementById('lightbox').classList.add('hidden');
+      // Fecha modal padrão
+      e.target.closest('.modal').classList.add('hidden'); 
+      e.target.closest('.modal').classList.remove('flex');
+      
+      // Fecha lightbox especificamente se estiver aberto, removendo o flex
+      const lb = document.getElementById('lightbox');
+      lb.classList.remove('flex');
+      lb.classList.add('hidden');
   });
-  document.getElementById('lightbox-close').onclick = () => document.getElementById('lightbox').classList.add('hidden');
+
+  // CORREÇÃO: Remove explicitamente a classe 'flex' ao fechar
+  document.getElementById('lightbox-close').onclick = () => {
+      const lb = document.getElementById('lightbox');
+      lb.classList.remove('flex'); // IMPORTANTE: Remove o display flex
+      lb.classList.add('hidden');  // Adiciona o hidden
+  };
+
   document.getElementById('lightbox-prev').onclick = () => { if(currentLightboxIndex>0) window.openLightbox(currentLightboxIndex-1); };
   document.getElementById('lightbox-next').onclick = () => { if(currentLightboxIndex<lightboxMedia.length-1) window.openLightbox(currentLightboxIndex+1); };
 
