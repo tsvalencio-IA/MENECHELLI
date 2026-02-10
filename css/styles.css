@@ -23,7 +23,7 @@ body {
   color: #94a3b8;
   padding: 1rem 0;
   font-weight: bold;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 @media (min-width: 640px) { #kanbanBoard { grid-template-columns: repeat(2, 1fr); gap: 1rem; } } 
