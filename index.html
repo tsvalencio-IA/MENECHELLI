@@ -2,451 +2,264 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard - Center Car Menechelli</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Center Car Menechelli</title>
   
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1e40af">
   <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="bg-gray-100">
+<body class="bg-slate-100">
 
-  <!-- TELA DE LOGIN -->
-  <div id="userScreen" class="flex items-center justify-center min-h-screen p-4 bg-slate-900">
-    <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-sm text-center border-t-8 border-blue-800 relative">
-      <div class="absolute top-0 right-0 bg-yellow-400 text-blue-900 text-xs font-bold px-2 py-1 rounded-bl-lg">v3.0 PRO</div>
-      <h1 class="text-2xl font-bold text-gray-800 mb-1">CENTER CAR</h1>
-      <h2 class="text-3xl font-black text-blue-900 mb-2">MENECHELLI</h2>
-      <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Sistema de Gestão Inteligente</p>
-      
-      <form id="loginForm" class="mt-4 text-left">
-        <div class="mb-4">
-          <label for="userSelect" class="block text-xs font-bold text-gray-600 uppercase mb-1">Usuário</label>
-          <div class="relative">
-            <select id="userSelect" required class="appearance-none p-3 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 font-bold text-gray-800">
-              <option value="">Carregando equipe...</option>
-            </select>
-            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-600">
-              <i class='bx bx-chevron-down text-xl'></i>
-            </div>
-          </div>
+  <!-- LOGIN -->
+  <div id="userScreen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900 p-4">
+    <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center border-t-8 border-blue-800">
+      <h1 class="text-xl font-bold text-gray-600">SISTEMA</h1>
+      <h2 class="text-3xl font-black text-blue-900 mb-4">MENECHELLI</h2>
+      <form id="loginForm" class="text-left space-y-4">
+        <div>
+          <label class="text-xs font-bold text-gray-500 uppercase">Usuário</label>
+          <select id="userSelect" required class="w-full p-3 bg-gray-50 border rounded-lg font-bold"><option value="">Carregando...</option></select>
         </div>
-        <div class="mb-6">
-          <label for="passwordInput" class="block text-xs font-bold text-gray-600 uppercase mb-1">Senha de Acesso</label>
-          <input type="password" id="passwordInput" required class="p-3 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 bg-white" placeholder="••••••">
+        <div>
+          <label class="text-xs font-bold text-gray-500 uppercase">Senha</label>
+          <input type="password" id="passwordInput" required class="w-full p-3 bg-gray-50 border rounded-lg" placeholder="••••••">
         </div>
-        <button type="submit" class="w-full btn bg-blue-800 hover:bg-blue-900 text-white py-3 text-sm font-bold shadow-lg transition-transform transform hover:scale-[1.02] flex justify-center items-center gap-2 uppercase tracking-wide">
-          <i class='bx bx-log-in-circle text-lg'></i> Entrar no Sistema
-        </button>
-        <p id="loginError" class="text-red-500 text-xs mt-3 text-center h-4 font-bold"></p>
+        <button type="submit" class="w-full btn bg-blue-800 text-white py-3 rounded-xl font-bold shadow-lg mt-2">ENTRAR</button>
+        <p id="loginError" class="text-red-500 text-xs text-center font-bold h-4"></p>
       </form>
-      
-      <div class="mt-8 pt-4 border-t border-gray-100 flex flex-col items-center gap-1">
-          <p class="text-[10px] text-gray-400 uppercase tracking-wider">Tecnologia</p>
-          <div class="flex items-center gap-1 text-blue-900 font-bold text-sm">
-            <span>thIAguinho Soluções</span> <i class='bx bxs-bot text-yellow-500'></i>
-          </div>
-      </div>
+      <div class="mt-6 pt-4 border-t text-[10px] text-gray-400">thIAguinho Soluções Automotivas</div>
     </div>
   </div>
 
-  <div id="app" class="hidden">
-    <header class="bg-white shadow-md sticky top-0 z-40">
-      <div id="attention-panel-container">
-        <div id="attention-panel" class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2"></div>
+  <!-- APP -->
+  <div id="app" class="hidden flex-col h-full">
+    <header class="bg-white shadow-sm z-30">
+      <div id="attention-panel-container" class="bg-slate-800 overflow-hidden transition-all duration-300 max-h-0">
+        <div id="attention-panel" class="grid grid-cols-1 gap-2 p-2"></div>
       </div>
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center gap-4">
-        <div class="flex items-center gap-3">
-            <div>
-                <h1 class="text-xl font-bold text-gray-800">CENTER CAR</h1>
-                <p class="text-sm font-semibold text-blue-800 -mt-1">Menechelli</p>
-            </div>
-            <div id="alert-led" class="hidden"></div>
-            <button id="toggle-panel-btn" class="text-gray-400 hover:text-blue-800 p-1" title="Mostrar/Ocultar Painel de Alertas">
-                <i class='bx bxs-chevron-up text-2xl'></i>
+
+      <div class="px-3 py-2 flex justify-between items-center gap-2">
+        <!-- Esquerda: Toggle + Logo Mobile -->
+        <div class="flex items-center gap-2">
+            <button id="toggle-panel-btn" class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg relative">
+                <i class='bx bxs-dashboard text-2xl text-slate-600'></i>
+                <span id="alert-led" class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full hidden"></span>
             </button>
+            <div class="leading-none hidden sm:block">
+                <h1 class="text-lg font-black text-blue-900">MENECHELLI</h1>
+            </div>
         </div>
         
-        <div class="flex-grow max-w-md relative search-container">
-            <input type="search" id="globalSearchInput" placeholder="Buscar por Placa..." class="w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <div id="globalSearchResults" class="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-b-md shadow-lg z-50 hidden max-h-60 overflow-y-auto">
-            </div>
+        <!-- Centro: Busca Global -->
+        <div class="flex-grow max-w-lg relative">
+            <input type="search" id="globalSearchInput" placeholder="Buscar Placa/Cliente..." class="w-full py-2 pl-3 pr-8 bg-slate-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <i class='bx bx-search absolute right-2 top-2.5 text-gray-400'></i>
+            <div id="globalSearchResults" class="absolute top-full left-0 right-0 bg-white shadow-xl rounded-lg mt-1 hidden z-50 max-h-60 overflow-y-auto border border-gray-200"></div>
         </div>
 
-        <div class="flex items-center gap-4">
-          <!-- Botão thIAguinho (Mantido do Center Car Original) -->
-          <a href="consultor.html" class="hidden md:flex bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg items-center gap-2 shadow-sm transition-all text-sm font-bold" title="IA Consultor">
-            <i class='bx bxs-brain'></i> thIAguinho
-          </a>
+        <!-- Direita: Ações -->
+        <div class="flex items-center gap-1">
+          <!-- BOTOES DESKTOP (Somente visiveis em telas medias pra cima) -->
+          <div id="desktopAdminActions" class="hidden md:flex items-center gap-1 border-r pr-2 mr-1">
+              <button id="adminBtn" class="p-2 text-slate-500 hover:text-blue-700" title="Configurações"><i class='bx bxs-cog text-xl'></i></button>
+              <button id="reportsBtn" class="p-2 text-slate-500 hover:text-green-700" title="Relatórios"><i class='bx bxs-file-pdf text-xl'></i></button>
+          </div>
 
-          <button id="addOSBtn" class="btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 flex items-center gap-2">
-            <i class='bx bx-plus-circle'></i><span class="hidden sm:inline">Nova O.S.</span>
-          </button>
+          <button id="addOSBtn" class="bg-blue-700 text-white w-10 h-10 rounded-lg flex items-center justify-center shadow-lg active:scale-95"><i class='bx bx-plus text-2xl'></i></button>
           
-          <button id="adminBtn" class="btn bg-gray-700 hover:bg-gray-800 text-white px-3 py-2 hidden" title="Gerenciar Contas de Mídia e Usuários">
-              <i class='bx bxs-cog text-xl'></i>
-          </button>
-           <button id="reportsBtn" class="btn bg-green-600 hover:bg-green-700 text-white px-3 py-2 hidden" title="Relatórios">
-              <i class='bx bxs-file-pdf text-xl'></i>
-          </button>
-          <div class="text-right">
-            <p id="currentUserName" class="font-semibold text-gray-700"></p>
-            <button id="logoutButton" class="text-sm text-red-500 hover:text-red-700">Sair</button>
+          <div class="relative">
+              <button id="userMenuBtn" class="w-10 h-10 bg-slate-200 rounded-full overflow-hidden border-2 border-white shadow-sm"><i class='bx bxs-user text-2xl text-slate-500 mt-1'></i></button>
+              
+              <!-- MENU MOBILE/DROPDOWN -->
+              <div id="userDropdown" class="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 hidden z-50">
+                  <div class="p-3 border-b bg-gray-50 rounded-t-xl">
+                      <p class="text-[10px] uppercase font-bold text-gray-400">Usuário</p>
+                      <p id="currentUserName" class="font-bold text-slate-800">...</p>
+                  </div>
+                  <!-- Botões Gestor Mobile (Só aparecem aqui no mobile) -->
+                  <button id="adminBtnMobile" class="md:hidden w-full text-left p-3 hover:bg-slate-50 flex gap-3 items-center text-sm font-bold text-slate-600 hidden"><i class='bx bxs-cog text-lg'></i> Configurações</button>
+                  <button id="reportsBtnMobile" class="md:hidden w-full text-left p-3 hover:bg-slate-50 flex gap-3 items-center text-sm font-bold text-slate-600 hidden"><i class='bx bxs-file-pdf text-lg'></i> Relatórios</button>
+                  <div class="border-t"></div>
+                  <button id="logoutButton" class="w-full text-left p-3 text-red-600 hover:bg-red-50 flex gap-3 items-center text-sm font-bold"><i class='bx bx-log-out text-lg'></i> Sair</button>
+              </div>
           </div>
         </div>
       </div>
     </header>
 
-    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-6" id="kanbanBoard"></div>
-    </main>
+    <main id="kanbanBoard"></main>
   </div>
 
-  <!-- MODAL NOVA OS -->
-  <div id="osModal" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4">
-    <div class="modal-content w-full max-w-lg">
-      <div class="modal-header">
-        <h2 id="osModalTitle" class="text-2xl font-bold text-gray-800">Nova Ordem de Serviço</h2>
+  <!-- MODAIS (FICHA, ADMIN, RELATORIOS) -->
+  
+  <!-- Ficha OS -->
+  <div id="osModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="bg-blue-900 text-white p-3 flex justify-between items-center">
+        <h2 class="font-bold">Nova Ordem de Serviço</h2>
+        <button class="btn-close-modal text-2xl">&times;</button>
       </div>
       <div class="modal-body">
-        <form id="osForm" class="space-y-4">
-          <input type="hidden" id="osId">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="form-group">
-              <label for="osPlaca" class="block text-sm font-medium text-gray-700 mb-1">Placa</label>
-              <input id="osPlaca" type="text" placeholder="ABC1234" required class="p-2 border rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div class="form-group">
-              <label for="osModelo" class="block text-sm font-medium text-gray-700 mb-1">Modelo do Veículo</label>
-              <input id="osModelo" type="text" placeholder="Ex: Fiat Toro" required class="p-2 border rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div class="form-group sm:col-span-2">
-              <label for="osCliente" class="block text-sm font-medium text-gray-700 mb-1">Nome do Cliente</label>
-              <input id="osCliente" type="text" placeholder="Nome completo" required class="p-2 border rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div class="form-group">
-              <label for="osTelefone" class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-              <input id="osTelefone" type="tel" placeholder="(11) 99999-9999" class="p-2 border rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div class="form-group">
-              <label for="osKm" class="block text-sm font-medium text-gray-700 mb-1">KM do Veículo</label>
-              <input id="osKm" type="number" placeholder="Ex: 50000" class="p-2 border rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div class="form-group sm:col-span-2">
-              <label for="osResponsavel" class="block text-sm font-medium text-gray-700 mb-1">Responsável pelo Atendimento</label>
-              <select id="osResponsavel" required class="p-2 border rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <option value="">Selecione um responsável...</option>
-              </select>
-            </div>
-            <div class="form-group sm:col-span-2">
-              <label for="osObservacoes" class="block text-sm font-medium text-gray-700 mb-1">Observações Iniciais / Queixa do Cliente</label>
-              <textarea id="osObservacoes" placeholder="Ex: Barulho no motor, vazamento de óleo..." rows="3" class="p-2 border rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
-            </div>
-            <div class="form-group sm:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Nível de Urgência do Orçamento</label>
-                <div class="flex items-center space-x-6">
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="radio" name="osPrioridade" value="verde" class="form-radio h-5 w-5 text-green-600" checked>
-                        <span class="text-sm font-medium text-gray-700">Verde (Normal)</span>
-                    </label>
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="radio" name="osPrioridade" value="amarelo" class="form-radio h-5 w-5 text-yellow-500">
-                        <span class="text-sm font-medium text-gray-700">Amarelo (Urgente)</span>
-                    </label>
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="radio" name="osPrioridade" value="vermelho" class="form-radio h-5 w-5 text-red-600">
-                        <span class="text-sm font-medium text-gray-700">Vermelho (Imediato)</span>
-                    </label>
-                </div>
-            </div>
+        <form id="osForm" class="space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-xs font-bold text-gray-500">PLACA</label><input id="osPlaca" type="text" class="w-full p-2 border rounded font-mono uppercase font-bold" required placeholder="ABC1234"></div>
+            <div><label class="text-xs font-bold text-gray-500">MODELO</label><input id="osModelo" type="text" class="w-full p-2 border rounded" required placeholder="Ex: Gol"></div>
           </div>
+          <div><label class="text-xs font-bold text-gray-500">CLIENTE</label><input id="osCliente" type="text" class="w-full p-2 border rounded" required></div>
+          <div class="grid grid-cols-2 gap-3">
+             <div><label class="text-xs font-bold text-gray-500">TELEFONE</label><input id="osTelefone" type="tel" class="w-full p-2 border rounded"></div>
+             <div><label class="text-xs font-bold text-gray-500">KM</label><input id="osKm" type="number" class="w-full p-2 border rounded"></div>
+          </div>
+          <div><label class="text-xs font-bold text-gray-500">RESPONSÁVEL</label><select id="osResponsavel" class="w-full p-2 border rounded bg-white" required></select></div>
+          <div><label class="text-xs font-bold text-gray-500">QUEIXA</label><textarea id="osObservacoes" rows="3" class="w-full p-2 border rounded"></textarea></div>
+          <div class="flex gap-2 justify-center bg-gray-50 p-2 rounded">
+              <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="osPrioridade" value="verde" checked> <span class="text-xs font-bold text-green-600">Normal</span></label>
+              <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="osPrioridade" value="amarelo"> <span class="text-xs font-bold text-yellow-600">Atenção</span></label>
+              <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="osPrioridade" value="vermelho"> <span class="text-xs font-bold text-red-600">Urgente</span></label>
+          </div>
+          <button type="submit" class="w-full bg-blue-700 text-white p-3 rounded font-bold">CRIAR FICHA</button>
         </form>
       </div>
-      <div class="modal-footer">
-        <span class="text-xs text-gray-500 mr-auto">Desenvolvido com 🤖 - por thIAguinho Soluções</span>
-        <button type="button" class="btn-close-modal btn bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2">Cancelar</button>
-        <button type="submit" form="osForm" class="btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2">Salvar</button>
-      </div>
     </div>
   </div>
 
-  <!-- MODAL DETALHES (PADRÃO CHEVRON) -->
-  <div id="detailsModal" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4">
-    <div class="modal-content w-full max-w-6xl">
-      <div class="modal-header">
-        <div class="flex justify-between items-start">
-          <h2 class="text-2xl font-bold text-gray-800">Detalhes da Ordem de Serviço</h2>
-          <button class="btn-close-modal text-3xl text-gray-400 hover:text-gray-600">&times;</button>
+  <!-- Detalhes OS -->
+  <div id="detailsModal" class="modal hidden">
+    <div class="modal-content h-full">
+      <div class="border-b p-3 flex justify-between items-center bg-gray-50">
+        <div>
+            <h2 class="text-xl font-black text-slate-800" id="modalTitlePlaca">...</h2>
+            <p class="text-xs text-slate-500" id="modalTitleModelo">...</p>
+        </div>
+        <div class="flex gap-2">
+            <button id="exportOsBtn" class="bg-gray-200 p-2 rounded hover:bg-gray-300"><i class='bx bxs-printer'></i></button>
+            <button class="btn-close-modal bg-red-100 text-red-500 p-2 rounded hover:bg-red-200"><i class='bx bx-x text-xl'></i></button>
         </div>
       </div>
-      <div class="modal-body">
-        <div class="os-details-container">
-          <div class="os-header">
-             <div id="detailsHeader" class="flex justify-between items-start flex-wrap"></div>
-            <div id="detailsObservacoes" class="hidden mt-4 pt-4 border-t border-gray-200"></div>
+      <div class="modal-body grid grid-cols-1 lg:grid-cols-3 gap-4 bg-slate-100">
+          <div class="lg:col-span-2 space-y-4">
+              <div id="detailsInfoContent" class="bg-white p-4 rounded shadow-sm"></div>
+              <div class="bg-white p-4 rounded shadow-sm">
+                  <h3 class="text-xs font-bold text-slate-400 mb-2">GALERIA</h3>
+                  <div id="thumbnail-grid" class="grid grid-cols-3 sm:grid-cols-5 gap-2"></div>
+              </div>
+              <div class="bg-white p-4 rounded shadow-sm">
+                  <h3 class="text-xs font-bold text-slate-400 mb-2">HISTÓRICO</h3>
+                  <div id="timelineContainer" class="space-y-0"></div>
+              </div>
           </div>
-          <div class="os-content">
-            <div class="space-y-6">
-              <div class="bg-white rounded-lg shadow p-4">
-                <h3 class="section-title">Galeria de Mídia</h3>
-                <div id="thumbnail-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 mt-4"></div>
-              </div>
-              <div class="bg-white rounded-lg shadow p-4">
-                <h3 class="section-title">Histórico da O.S.</h3>
-                <div id="timelineContainer" class="timeline mt-4 space-y-6"></div>
-              </div>
-            </div>
-            <div class="os-actions-section space-y-6">
-              <div class="bg-white rounded-lg shadow p-4">
-                  <h3 class="section-title">Adicionar Atualização</h3>
-                  <form id="logForm" class="space-y-4">
-                    <input type="hidden" id="logOsId">
-                    <textarea id="logDescricao" placeholder="Descrição do serviço, peça, observação..." rows="3" required class="p-2 border rounded w-full"></textarea>
-                    <div class="flex gap-4">
-                      <input id="logPecas" type="text" placeholder="Peças (opcional)" class="p-2 border rounded w-1/2">
-                      <input id="logValor" type="number" step="0.01" placeholder="Valor R$ (opcional)" class="p-2 border rounded w-1/2">
-                    </div>
-                    <div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="button" id="openCameraBtn" class="w-full btn bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-center gap-2 cursor-pointer">
-                                <i class='bx bxs-camera'></i> Câmera
-                            </button>
-                            <button type="button" id="openGalleryBtn" class="w-full btn bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-center gap-2 cursor-pointer">
-                                <i class='bx bxs-image-add'></i> Galeria
-                            </button>
-                        </div>
-                      <input id="media-input" type="file" class="hidden" multiple accept="image/*,video/*,application/pdf">
-                      <p id="fileName" class="text-sm text-gray-500 mt-1 truncate"></p>
-                    </div>
-                    <button type="submit" class="w-full btn bg-green-600 hover:bg-green-700 text-white px-4 py-2 flex items-center justify-center gap-2">
-                      <i class='bx bx-message-square-add'></i> Adicionar ao Histórico
-                    </button>
+          <div class="space-y-4">
+              <div class="bg-white p-4 rounded shadow-sm border-t-4 border-blue-500">
+                  <h3 class="font-bold text-blue-900 mb-2">Nova Atualização</h3>
+                  <form id="logForm" class="space-y-2">
+                      <input type="hidden" id="logOsId">
+                      <textarea id="logDescricao" placeholder="O que foi feito?" rows="3" class="w-full p-2 border rounded text-sm"></textarea>
+                      <div class="flex gap-2">
+                          <input id="logPecas" placeholder="Peças" class="w-full p-2 border rounded text-sm">
+                          <input id="logValor" type="number" placeholder="R$" class="w-24 p-2 border rounded text-sm">
+                      </div>
+                      <div class="grid grid-cols-2 gap-2">
+                          <button type="button" id="openCameraBtn" class="bg-gray-100 p-2 rounded text-xs font-bold"><i class='bx bxs-camera'></i> FOTO</button>
+                          <button type="button" id="openGalleryBtn" class="bg-gray-100 p-2 rounded text-xs font-bold"><i class='bx bxs-image'></i> GALERIA</button>
+                      </div>
+                      <input id="media-input" type="file" class="hidden" multiple>
+                      <p id="fileName" class="text-xs text-blue-500 h-4 truncate"></p>
+                      <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded font-bold text-sm">SALVAR</button>
                   </form>
-                  <div id="post-log-actions" class="hidden mt-4 border-t pt-4 space-y-2">
-                    <h4 class="font-semibold text-gray-700 text-center">Registro Salvo! Mover O.S.?</h4>
-                    <button id="btn-move-next" class="w-full btn bg-blue-500 hover:bg-blue-600 text-white">Avançar Status</button>
-                    <button id="btn-move-prev" class="w-full btn bg-yellow-500 hover:bg-yellow-600 text-white">Retroceder Status</button>
-                    <button id="btn-stay" class="w-full btn bg-gray-400 hover:bg-gray-500 text-white">Apenas Atualizar</button>
+                  <div id="post-log-actions" class="hidden mt-3 pt-3 border-t">
+                      <p class="text-center text-xs font-bold text-gray-400 mb-2">MOVER VEÍCULO?</p>
+                      <div class="flex gap-2">
+                          <button id="btn-move-prev" class="flex-1 bg-gray-200 p-2 rounded text-xs font-bold">< Voltar</button>
+                          <button id="btn-move-next" class="flex-1 bg-green-500 text-white p-2 rounded text-xs font-bold">Avançar ></button>
+                      </div>
+                      <button id="btn-stay" class="w-full mt-2 text-xs text-gray-400 underline">Manter aqui</button>
                   </div>
               </div>
-              <div class="bg-white rounded-lg shadow p-4">
-                  <form id="kmUpdateForm">
-                    <h4 class="font-semibold text-gray-700 mb-2">Atualizar KM</h4>
-                    <div class="flex gap-2">
-                        <input id="updateKmInput" type="number" placeholder="Nova KM" class="p-2 border rounded w-full">
-                        <button type="submit" class="btn bg-blue-500 hover:bg-blue-600 text-white px-3" title="Salvar KM"><i class='bx bx-save'></i></button>
-                    </div>
-                  </form>
+              <div id="adminZone" class="hidden">
+                  <button id="deleteOsBtn" class="w-full border border-red-200 text-red-500 p-2 rounded text-sm font-bold hover:bg-red-50">EXCLUIR FICHA</button>
               </div>
-              <div class="bg-white rounded-lg shadow p-4">
-                  <button id="exportOsBtn" class="w-full btn bg-gray-700 hover:bg-gray-800 text-white">
-                    <i class='bx bx-printer'></i> Imprimir / Exportar O.S. (Padrão Menechelli)
-                  </button>
-              </div>
-              <div class="bg-white rounded-lg shadow p-4">
-                  <button id="deleteOsBtn" class="w-full btn bg-red-600 hover:bg-red-700 text-white hidden">
-                    <i class='bx bx-trash'></i> Excluir O.S.
-                  </button>
-              </div>
-            </div>
           </div>
-        </div>
       </div>
     </div>
   </div>
 
-  <!-- LIGHTBOX -->
-  <div id="lightbox" class="modal fixed inset-0 z-[100] hidden items-center justify-center p-4">
-    <div class="absolute inset-0" id="lightbox-close-bg"></div>
-    <div class="relative bg-black bg-opacity-50 p-4 rounded-lg max-w-4xl w-full">
-        <div id="lightbox-content" class="flex items-center justify-center min-h-[300px]"></div>
-        <button id="lightbox-close" class="absolute -top-2 -right-2 bg-white text-black rounded-full h-8 w-8 flex items-center justify-center">&times;</button>
-        <button id="lightbox-prev" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/50 hover:bg-white text-black p-2 rounded-full"><i class='bx bx-chevron-left text-2xl'></i></button>
-        <button id="lightbox-next" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/50 hover:bg-white text-black p-2 rounded-full"><i class='bx bx-chevron-right text-2xl'></i></button>
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4">
-            <a id="lightbox-download" href="#" download class="bg-blue-600 text-white p-2 rounded-full"><i class='bx bxs-download'></i></a>
-            <button id="lightbox-copy" class="bg-blue-600 text-white p-2 rounded-full"><i class='bx bx-copy'></i></button>
-        </div>
-    </div>
+  <!-- Admin Modal -->
+  <div id="adminModal" class="modal hidden">
+      <div class="modal-content h-[80vh]">
+          <div class="border-b p-4 flex justify-between items-center bg-gray-50">
+              <h2 class="font-bold text-lg">Administração</h2>
+              <button class="btn-close-modal text-2xl">&times;</button>
+          </div>
+          <div class="flex border-b">
+              <button class="flex-1 p-3 font-bold text-blue-600 border-b-2 border-blue-600 admin-tab" data-target="tab-users">Equipe</button>
+              <button class="flex-1 p-3 font-bold text-gray-500 admin-tab" data-target="tab-cloudinary">Mídia</button>
+          </div>
+          <div class="modal-body bg-gray-50">
+              <div id="tab-users" class="admin-tab-content">
+                  <form id="addUserForm" class="bg-white p-4 rounded shadow-sm mb-4 space-y-3">
+                      <input id="newUserName" placeholder="Nome" class="w-full p-2 border rounded" required>
+                      <select id="newUserRole" class="w-full p-2 border rounded"><option>Colaborador</option><option>Mecânico</option><option>Gestor</option></select>
+                      <input id="newUserPass" placeholder="Senha" class="w-full p-2 border rounded" required>
+                      <button class="w-full bg-green-600 text-white p-2 rounded font-bold">Adicionar</button>
+                  </form>
+                  <div id="usersList" class="space-y-2"></div>
+              </div>
+              <div id="tab-cloudinary" class="admin-tab-content hidden">
+                  <form id="cloudinaryForm" class="bg-white p-4 rounded shadow-sm space-y-3">
+                      <p class="text-xs text-blue-800 bg-blue-50 p-2 rounded">Configuração para upload de fotos/vídeos.</p>
+                      <input id="cloudNameInput" placeholder="Cloud Name" class="w-full p-2 border rounded">
+                      <input id="uploadPresetInput" placeholder="Upload Preset" class="w-full p-2 border rounded">
+                      <button class="w-full bg-blue-700 text-white p-2 rounded font-bold">Salvar Config</button>
+                  </form>
+              </div>
+          </div>
+      </div>
   </div>
 
-  <!-- MODAL DE CONFIRMAÇÕES (EXCLUSÃO, ETC) -->
-  <div id="confirmDeleteModal" class="modal fixed inset-0 z-[101] hidden items-center justify-center p-4">
-    <div class="modal-content w-full max-w-md">
-        <div class="modal-header">
-            <h2 class="text-xl font-bold text-red-600 flex items-center gap-2"><i class='bx bxs-error-circle'></i>Confirmar Exclusão</h2>
-        </div>
-        <div class="modal-body">
-            <p id="confirmDeleteText" class="text-gray-700"></p>
-        </div>
-        <div class="modal-footer">
-            <button id="cancelDeleteBtn" class="btn bg-gray-200 hover:bg-gray-300 text-gray-800">Cancelar</button>
-            <button id="confirmDeleteBtn" class="btn bg-red-600 hover:bg-red-700 text-white">Sim, Excluir</button>
-        </div>
-    </div>
+  <!-- Relatórios Modal -->
+  <div id="reportsModal" class="modal hidden">
+      <div class="modal-content h-[80vh]">
+          <div class="border-b p-4 flex justify-between items-center">
+              <h2 class="font-bold">Relatório de Entregas</h2>
+              <button class="btn-close-modal text-2xl">&times;</button>
+          </div>
+          <div class="modal-body flex flex-col">
+              <form id="reportsForm" class="flex gap-2 mb-4">
+                  <input type="date" id="startDate" class="border p-2 rounded w-full" required>
+                  <input type="date" id="endDate" class="border p-2 rounded w-full" required>
+                  <button class="bg-blue-600 text-white px-4 rounded font-bold">OK</button>
+              </form>
+              <div id="reportsResultContainer" class="flex-grow overflow-y-auto bg-gray-50 p-2 rounded border"></div>
+              <button id="exportReportBtn" class="hidden mt-2 bg-green-600 text-white p-3 rounded font-bold w-full">IMPRIMIR LISTA</button>
+          </div>
+      </div>
   </div>
 
-  <!-- MODAL CONFIRMAÇÃO LOG -->
-  <div id="confirmDeleteLogModal" class="modal fixed inset-0 z-[101] hidden items-center justify-center p-4">
-    <div class="modal-content w-full max-w-md">
-        <div class="modal-header">
-            <h2 class="text-xl font-bold text-red-600 flex items-center gap-2"><i class='bx bxs-error-circle'></i>Confirmar Exclusão de Atualização</h2>
-        </div>
-        <div class="modal-body">
-            <p id="confirmDeleteLogText" class="text-gray-700"></p>
-        </div>
-        <div class="modal-footer">
-            <button id="cancelDeleteLogBtn" class="btn bg-gray-200 hover:bg-gray-300 text-gray-800">Cancelar</button>
-            <button id="confirmDeleteLogBtn" class="btn bg-red-600 hover:bg-red-700 text-white">Sim, Excluir</button>
-        </div>
-    </div>
+  <!-- Lightbox e Confirm -->
+  <div id="lightbox" class="modal hidden z-[200] bg-black/95">
+      <button id="lightbox-close" class="absolute top-4 right-4 text-white text-4xl">&times;</button>
+      <div id="lightbox-content" class="w-full h-full flex items-center justify-center p-4"></div>
   </div>
 
-  <!-- MODAL CONFIRMAÇÃO MÍDIA -->
-  <div id="confirmDeleteMediaModal" class="modal fixed inset-0 z-[101] hidden items-center justify-center p-4">
-    <div class="modal-content w-full max-w-md">
-        <div class="modal-header">
-            <h2 class="text-xl font-bold text-red-600 flex items-center gap-2"><i class='bx bxs-error-circle'></i>Confirmar Exclusão de Mídia</h2>
-        </div>
-        <div class="modal-body">
-            <p id="confirmDeleteMediaText" class="text-gray-700"></p>
-        </div>
-        <div class="modal-footer">
-            <button id="cancelDeleteMediaBtn" class="btn bg-gray-200 hover:bg-gray-300 text-gray-800">Cancelar</button>
-            <button id="confirmDeleteMediaBtn" class="btn bg-red-600 hover:bg-red-700 text-white">Sim, Excluir</button>
-        </div>
-    </div>
-  </div>
-
-  <!-- MODAL ADMIN E ABAS (Mantido do Center Car para gestão de usuários, mas adaptado ao visual) -->
-  <div id="adminModal" class="modal fixed inset-0 z-[101] hidden items-center justify-center p-4">
-    <div class="modal-content w-full max-w-3xl bg-white rounded-xl shadow-2xl h-[85vh] flex flex-col overflow-hidden">
-        <div class="modal-header bg-gray-50 border-b p-5">
-            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2"><i class='bx bxs-cog text-blue-600'></i> Painel Administrativo</h2>
-        </div>
-        
-        <!-- Abas do Admin -->
-        <div class="flex border-b border-gray-200 bg-white">
-            <button class="admin-tab active flex-1 py-4 text-blue-600 border-b-2 border-blue-600 font-bold bg-blue-50/30" data-target="tab-users">
-                <i class='bx bxs-group'></i> Gestão de Equipe
-            </button>
-            <button class="admin-tab flex-1 py-4 text-gray-500 hover:text-gray-700 font-medium" data-target="tab-cloudinary">
-                <i class='bx bxs-cloud'></i> Configuração Mídia
-            </button>
-        </div>
-
-        <div class="overflow-y-auto flex-grow p-6 bg-gray-50 modal-body">
-            
-            <!-- ABA USUÁRIOS -->
-            <div id="tab-users" class="admin-tab-content">
-                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
-                    <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2"><i class='bx bx-user-plus'></i> Cadastrar Novo Colaborador</h3>
-                    <form id="addUserForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="md:col-span-2">
-                            <input type="text" id="newUserName" placeholder="Nome Completo" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                        <select id="newUserRole" class="p-3 border rounded-lg bg-white outline-none">
-                            <option value="Colaborador">Colaborador (Básico)</option>
-                            <option value="Mecânico">Mecânico</option>
-                            <option value="Atendente">Atendente (Recepção)</option>
-                            <option value="Gestor">Gestor (Acesso Total)</option>
-                        </select>
-                        <input type="text" id="newUserPass" placeholder="Senha de Acesso" required class="p-3 border rounded-lg outline-none">
-                        <div class="md:col-span-2">
-                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow transition-colors">
-                                <i class='bx bx-check'></i> Salvar Usuário
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                
-                <h3 class="font-bold text-gray-600 text-sm uppercase tracking-wider mb-2 ml-1">Equipe Atual</h3>
-                <div id="usersList" class="space-y-2"></div>
-            </div>
-
-            <!-- ABA CLOUDINARY -->
-            <div id="tab-cloudinary" class="admin-tab-content hidden">
-                <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 mb-6">
-                    <p class="text-sm text-blue-800">Insira as chaves da sua conta Cloudinary para ativar o upload de fotos e vídeos.</p>
-                </div>
-                <form id="cloudinaryForm" class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
-                     <div>
-                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Cloud Name</label>
-                         <input id="cloudNameInput" type="text" placeholder="Ex: dyjlxqcnb" class="w-full p-3 border rounded-lg font-mono text-sm bg-gray-50">
-                     </div>
-                     <div>
-                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Upload Preset (Unsigned)</label>
-                         <input id="uploadPresetInput" type="text" placeholder="Ex: oficina-preset" class="w-full p-3 border rounded-lg font-mono text-sm bg-gray-50">
-                     </div>
-                     <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white py-3 rounded-lg font-bold shadow">
-                        Salvar Configuração
-                     </button>
-                </form>
-                <div class="mt-6 border-t pt-4">
-                    <h3 class="font-semibold text-gray-700 mb-2">Conta Ativa Atualmente:</h3>
-                    <p id="activeCloudinaryInfo" class="text-sm bg-gray-100 p-2 rounded">Carregando...</p>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn-close-modal btn bg-gray-200 hover:bg-gray-300 text-gray-800">Fechar</button>
-        </div>
-    </div>
-  </div>
-
-  <!-- RELATÓRIOS -->
-  <div id="reportsModal" class="modal fixed inset-0 z-[101] hidden items-center justify-center p-4">
-    <div class="modal-content w-full max-w-4xl">
-        <div class="modal-header">
-            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2"><i class='bx bxs-report'></i>Relatório de Veículos Entregues</h2>
-            <button class="btn-close-modal text-3xl text-gray-400 hover:text-gray-600">&times;</button>
-        </div>
-        <div class="modal-body">
-            <form id="reportsForm" class="flex items-end gap-4 p-4 bg-gray-50 rounded-lg">
-                <div>
-                    <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
-                    <input type="date" id="startDate" required class="p-2 border rounded w-full">
-                </div>
-                <div>
-                    <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
-                    <input type="date" id="endDate" required class="p-2 border rounded w-full">
-                </div>
-                <button type="submit" class="btn bg-blue-600 hover:bg-blue-700 text-white">Gerar</button>
-            </form>
-            <div id="reportsResultContainer" class="mt-4 max-h-96 overflow-y-auto"></div>
-        </div>
-        <div class="modal-footer">
-            <button id="exportReportBtn" class="btn bg-green-600 hover:bg-green-700 text-white hidden"><i class='bx bxs-file-export'></i>Exportar Lista (PDF)</button>
-            <button type="button" class="btn-close-modal btn bg-gray-200 hover:bg-gray-300 text-gray-800">Fechar</button>
-        </div>
-    </div>
+  <div id="confirmDeleteModal" class="modal hidden z-[200]">
+      <div class="bg-white p-6 rounded-xl shadow-2xl text-center max-w-sm">
+          <h3 class="font-bold text-lg mb-2">Tem certeza?</h3>
+          <p id="confirmDeleteText" class="text-sm text-gray-500 mb-4"></p>
+          <div class="flex gap-2">
+              <button id="cancelDeleteBtn" class="flex-1 bg-gray-200 p-2 rounded font-bold">Cancelar</button>
+              <button id="confirmDeleteBtn" class="flex-1 bg-red-600 text-white p-2 rounded font-bold">EXCLUIR</button>
+          </div>
+      </div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf-autotable.min.js"></script>
   <script src="js/app.js"></script>
-  
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(registration => {
-            console.log('Service Worker registrado com sucesso:', registration);
-          })
-          .catch(error => {
-            console.log('Falha ao registrar o Service Worker:', error);
-          });
-      });
-    }
-  </script>
-  
 </body>
 </html>
